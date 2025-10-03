@@ -1,0 +1,26 @@
+{
+  "name": "@finlitgg/backend",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "convex dev",
+    "build": "tsc --noEmit && echo 'Backend: Convex deployment requires login (npx convex login)'",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .convex *.tsbuildinfo"
+  },
+  "dependencies": {
+    "convex": "catalog:",
+    "@finlitgg/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "eslint": "catalog:",
+    "@eslint/js": "catalog:",
+    "typescript-eslint": "catalog:",
+    "eslint-config-prettier": "catalog:"
+  }
+}
+
+

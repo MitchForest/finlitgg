@@ -1,0 +1,9 @@
+# Build outputs
+dist
+
+# Generated files
+src/routeTree.gen.ts
+
+# TypeScript
+*.tsbuildinfo
+

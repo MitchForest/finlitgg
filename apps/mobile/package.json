@@ -1,0 +1,37 @@
+{
+  "name": "@finlitgg/mobile",
+  "version": "0.0.1",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "build": "echo 'Mobile build configured'",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .expo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "expo": "catalog:",
+    "expo-router": "~4.0.14",
+    "react": "catalog:",
+    "react-native": "catalog:",
+    "nativewind": "catalog:",
+    "@finlitgg/shared": "workspace:*",
+    "@finlitgg/auth": "workspace:*",
+    "convex": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/react": "catalog:",
+    "eslint": "catalog:",
+    "@eslint/js": "catalog:",
+    "typescript-eslint": "catalog:",
+    "eslint-config-prettier": "catalog:",
+    "@expo/metro-runtime": "~4.0.0"
+  }
+}
+
+
