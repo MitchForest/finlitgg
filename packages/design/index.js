@@ -1,2 +1,2 @@
-// Design system exports will go here
-export {};
+export * from './tokens.js';
+export { default as tokens } from './tokens.js';

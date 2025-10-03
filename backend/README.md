@@ -1,6 +1,6 @@
 # Backend (Convex)
 
-Backend for finlit.gg using Convex.
+Backend for Guap using Convex.
 
 ## Structure
 
@@ -31,5 +31,4 @@ To be implemented:
 - Account transfer logic
 - Goal funding automation
 - XP/badge calculations
-
 

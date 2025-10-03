@@ -1,5 +1,5 @@
 {
-  "name": "@finlitgg/website",
+  "name": "@guap/website",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -15,8 +15,8 @@
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "@finlitgg/design": "workspace:*",
-    "@finlitgg/shared": "workspace:*",
+    "@guap/design": "workspace:*",
+    "@guap/shared": "workspace:*",
     "convex": "catalog:"
   },
   "devDependencies": {
@@ -28,5 +28,4 @@
     "eslint-config-next": "15.1.4"
   }
 }
-
 

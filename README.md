@@ -1,11 +1,11 @@
-# finlit.gg
+# Guap
 
 Financial literacy platform for kids - Sequence-inspired money routing + learning gamification.
 
 ## Structure
 
 ```
-finlitgg/
+guap/
 ├── apps/
 │   ├── website/     # Marketing site (Next.js 15)
 │   ├── web/         # Kid app (Vite + React + TanStack Router)

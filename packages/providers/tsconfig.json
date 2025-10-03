@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "module": "ES2020",
+    "target": "ES2020"
+  },
+  "include": ["**/*.js", "**/*.d.ts"],
+  "references": []
+}

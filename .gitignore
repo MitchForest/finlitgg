@@ -41,4 +41,7 @@ coverage
 .cache
 *.tsbuildinfo
 
+# Documentation playground
+.docs/playground
+
 

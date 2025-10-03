@@ -2,9 +2,8 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@finlitgg/design', '@finlitgg/shared'],
+  transpilePackages: ['@guap/design', '@guap/shared'],
 };
 
 export default nextConfig;
-
 

@@ -1,5 +1,5 @@
 {
-  "name": "@finlitgg/shared",
+  "name": "@guap/shared",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -41,5 +41,4 @@
     "eslint-config-prettier": "catalog:"
   }
 }
-
 

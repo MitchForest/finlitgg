@@ -11,8 +11,8 @@
   "include": ["src"],
   "references": [
     { "path": "../../packages/shared" },
-    { "path": "../../packages/auth" }
+    { "path": "../../packages/auth" },
+    { "path": "../../packages/design" }
   ]
 }
-
 

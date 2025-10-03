@@ -1,10 +1,27 @@
-import { defineSchema } from 'convex/server';
+import { defineSchema, defineTable } from 'convex/server';
+import { v } from 'convex/values';
 
-/**
- * Database schema for finlit.gg
- * Tables will be defined here as features are built
- */
+const providerSelection = () =>
+  v.object({
+    type: v.string(),
+    settings: v.optional(v.any()),
+  });
 
 export default defineSchema({
-  // Schema tables will be added here
+  households: defineTable({
+    name: v.string(),
+    createdAt: v.number(),
+  }),
+
+  providerConfigs: defineTable({
+    scope: v.union(v.literal('global'), v.literal('household')),
+    householdId: v.optional(v.id('households')),
+    marketData: providerSelection(),
+    trading: providerSelection(),
+    banking: providerSelection(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_scope', ['scope'])
+    .index('by_household', ['householdId']),
 });

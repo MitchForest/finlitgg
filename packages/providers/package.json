@@ -1,0 +1,28 @@
+{
+  "name": "@guap/providers",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./market-data": "./market-data/index.js",
+    "./trading": "./trading/index.js",
+    "./banking": "./banking/index.js",
+    "./provider-registry": "./provider-registry.js"
+  },
+  "types": "./index.d.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf *.tsbuildinfo"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "catalog:",
+    "eslint": "catalog:",
+    "@eslint/js": "catalog:",
+    "typescript-eslint": "catalog:",
+    "eslint-config-prettier": "catalog:"
+  }
+}

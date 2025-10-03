@@ -1,5 +1,5 @@
 {
-  "name": "@finlitgg/auth",
+  "name": "@guap/auth",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "better-auth": "catalog:",
-    "@finlitgg/shared": "workspace:*"
+    "@guap/shared": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",
@@ -43,5 +43,4 @@
     "react": "catalog:"
   }
 }
-
 

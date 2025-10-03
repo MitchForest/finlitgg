@@ -1,9 +1,9 @@
 {
-  "name": "finlitgg",
+  "name": "guap",
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Financial literacy platform for kids - Sequence-inspired money routing + learning",
+  "description": "Guap – financial autonomy platform for kids and guardians",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -24,5 +24,4 @@
     "pnpm": ">=9.0.0"
   }
 }
-
 

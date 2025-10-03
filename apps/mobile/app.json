@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "finlit.gg",
-    "slug": "finlitgg",
+    "name": "Guap",
+    "slug": "guap",
     "version": "0.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "scheme": "finlitgg",
+    "scheme": "guap",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -15,14 +15,14 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "gg.finlit.app"
+      "bundleIdentifier": "com.guap.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0a0a0a"
       },
-      "package": "gg.finlit.app"
+      "package": "com.guap.app"
     },
     "web": {
       "bundler": "metro",
@@ -35,5 +35,4 @@
     }
   }
 }
-
 

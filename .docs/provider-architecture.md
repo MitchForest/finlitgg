@@ -9,8 +9,7 @@ Defined in `packages/providers/<area>/types.ts`, shared across backend code.
 
 ```ts
 export interface MarketDataPort {
-  subscribeQuotes(symbols: string[]): Promise<SubscriptionHandle>;
-  unsubscribe(handle: SubscriptionHandle): Promise<void>;
+  subscribeQuotes(symbols: string[], listener: QuoteListener): Promise<QuoteSubscription>;
   fetchSnapshot(symbol: string): Promise<QuoteSnapshot>;
 }
 
@@ -57,23 +56,23 @@ Config can be global (env-based) or per household (Convex table `provider_config
 ```
 packages/providers/
   market-data/
-    index.ts          // exports type definitions + adapter map
-    polygon.ts        // Polygon WS/REST implementation
-    simulated.ts      // deterministic price engine for demos/tests
+    index.js          // exports type definitions + adapter map
+    polygon.js        // Polygon WS/REST implementation
+    simulated.js      // deterministic price engine for demos/tests
   trading/
-    index.ts
-    simulated.ts      // writes to virtual ledger
-    drivewealth.ts    // future real adapter
-    alpaca.ts         // future real adapter
+    index.js
+    simulated.js      // writes to virtual ledger
+    drivewealth.js    // future real adapter
+    alpaca.js         // future real adapter
   banking/
-    index.ts
-    virtual.ts        // uses our virtual accounts tables
-    bass-provider.ts  // future bank partner
+    index.js
+    virtual.js        // uses our virtual accounts tables
+    bass-provider.js  // future bank partner
 ```
 
 Each adapter:
 - Implements the relevant port using provider SDKs or HTTP.
-- Normalizes responses to domain objects via Zod.
+- Normalizes responses to domain objects via Zod (from `packages/shared` or local schemas).
 - Encapsulates connection lifecycle, retries, error mapping, telemetry.
 - Exposes a factory `createAdapter(settings: AdapterSettings): MarketDataPort` so `resolveProviders` can instantiate it.
 

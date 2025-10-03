@@ -1,13 +1,14 @@
 {
-  "name": "@finlitgg/design",
+  "name": "@guap/design",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "main": "./index.js",
+  "types": "./index.d.ts",
   "exports": {
     ".": "./index.js",
-    "./tailwind.config": "./tailwind.config.ts",
-    "./tokens": "./tokens.ts"
+    "./tokens": "./tokens.js",
+    "./styles.css": "./styles.css"
   },
   "scripts": {
     "lint": "eslint .",
@@ -23,5 +24,3 @@
     "eslint-config-prettier": "catalog:"
   }
 }
-
-

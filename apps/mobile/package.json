@@ -1,5 +1,5 @@
 {
-  "name": "@finlitgg/mobile",
+  "name": "@guap/mobile",
   "version": "0.0.1",
   "private": true,
   "main": "expo-router/entry",
@@ -19,8 +19,8 @@
     "react": "catalog:",
     "react-native": "catalog:",
     "nativewind": "catalog:",
-    "@finlitgg/shared": "workspace:*",
-    "@finlitgg/auth": "workspace:*",
+    "@guap/shared": "workspace:*",
+    "@guap/auth": "workspace:*",
     "convex": "catalog:"
   },
   "devDependencies": {
@@ -33,5 +33,4 @@
     "@expo/metro-runtime": "~4.0.0"
   }
 }
-
 

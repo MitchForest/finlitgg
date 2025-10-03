@@ -1,6 +1,6 @@
 # Mobile App (Expo)
 
-React Native mobile app for finlit.gg.
+React Native mobile app for Guap.
 
 ## Development
 
@@ -23,7 +23,6 @@ pnpm android    # Open Android emulator
 - Push notifications
 - Apple/Google Family integrations
 - Biometric auth
-
 
 
 
