@@ -68,7 +68,8 @@ This schema maps directly to the MVP user stories in `.docs/user-stories.md`. Ea
 | id | uuid PK | |
 | household_id | uuid FK -> households.id | |
 | owner_user_id | uuid FK -> users.id nullable | Kid-specific accounts reference the kid; null for household pooled funds |
-| type | enum(`save`,`invest`,`spend`,`donate`,`credit_collateral`) | Matches sidebar domains |
+| type | enum(`save`,`invest`,`spend`,`donate`,`liability`,`external_destination`) | Matches sidebar domains and React Flow node categories |
+| account_subtype | enum(`checking`,`hysa`,`brokerage`,`custodial_brokerage`,`education_savings`,`credit_card`,`student_loan`,`personal_loan`,`donation_pool`,`external_destination`) | Helps the playground distinguish deposit, investment, liability, and payout endpoints |
 | scope | enum(`kid`,`household`) | Controls visibility |
 | name | text | Display label |
 | status | enum(`active`,`archived`) | |
@@ -109,11 +110,25 @@ This schema maps directly to the MVP user stories in `.docs/user-stories.md`. Ea
 | balance_cents | bigint | Balance at snapshot time |
 | captured_at | timestamptz | Used for dashboard spark lines |
 
+### account_partitions
+| Column | Type | Notes |
+| --- | --- | --- |
+| id | uuid PK | |
+| account_id | uuid FK -> accounts.id | Parent checking/savings/spend/liability account |
+| name | text | Display label (Needs, Wants, Vacation, etc.) |
+| partition_type | enum(`budget`,`goal`,`donation`,`debt`) | Determines UI treatment and default animations |
+| target_allocation_pct | numeric nullable | Optional % of incoming funds earmarked for this partition |
+| balance_cents | bigint | Running balance for simulation + live spend |
+| goal_id | uuid FK -> goals.id nullable | Links savings partitions to formal goals |
+| created_at | timestamptz | |
+| updated_at | timestamptz | |
+
 ### virtual_cards
 | Column | Type | Notes |
 | --- | --- | --- |
 | id | uuid PK | |
 | account_id | uuid FK -> accounts.id | Spend/credit accounts |
+| partition_id | uuid FK -> account_partitions.id nullable | Optional link to specific bucket/pod |
 | kid_id | uuid FK -> users.id | Owner of the card |
 | card_type | enum(`debit`,`secured_credit`) | |
 | status | enum(`active`,`frozen`,`canceled`) | Supports guardian actions |
@@ -135,10 +150,25 @@ This schema maps directly to the MVP user stories in `.docs/user-stories.md`. Ea
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
+### wealth_progress_snapshots
+| Column | Type | Notes |
+| --- | --- | --- |
+| id | uuid PK | |
+| kid_id | uuid FK -> users.id | Owner of the projection |
+| flow_id | uuid FK -> automation_flows.id nullable | Draft or production flow used for this projection |
+| captured_at | timestamptz | When the snapshot was generated (real or simulated time) |
+| net_worth_cents | bigint | Aggregate of assets minus liabilities |
+| wealth_level | integer | Current ladder rung index |
+| next_level_target_cents | bigint | Amount required for next rung |
+| months_to_next_level | integer nullable | Projection horizon; null when already at top rung |
+| snapshot_source | enum(`actual`,`simulation_preview`) | Distinguishes live data from wow playground previews |
+
 **Relationships**
 - `transactions` fuel wealth ladder and dashboards for both personas.
 - `transaction_splits` power needs vs wants coaching and goal funding analytics.
-- `virtual_cards` + `card_controls` implement spend and credit guardrail stories.
+- `account_partitions` model the buckets/pods surfaced in the wow flow and power allocations + ripple animations.
+- `virtual_cards` + `card_controls` implement spend and credit guardrail stories, optionally scoped to a partition.
+- `wealth_progress_snapshots` cache ladder progression for dashboards and replaying wow simulations.
 
 ## 3. Earn, Allowances & Income Events
 
@@ -312,6 +342,7 @@ This schema maps directly to the MVP user stories in `.docs/user-stories.md`. Ea
 **Relationships**
 - `goal_transfers` and `goal_events` support kid-initiated adjustments and guardian oversight.
 - `goal_match_policies` implement guardian incentives and optionally tie into Reward Vault entries.
+- Savings-focused `account_partitions` can point at `goals`, letting the wow flow and dashboard buckets stay synchronized.
 
 ## 5. Practice Investing
 
@@ -376,6 +407,7 @@ This schema maps directly to the MVP user stories in `.docs/user-stories.md`. Ea
 | icon | text nullable | UI hint |
 | config | jsonb | Serialized nodes/edges |
 | visibility | enum(`global`,`household`,`private`) | Controls discoverability |
+| scenario_type | enum(`baseline`,`stress_test`,`custom`) | Distinguishes seeded "bad idea" overlays from neutral templates |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
@@ -388,6 +420,7 @@ This schema maps directly to the MVP user stories in `.docs/user-stories.md`. Ea
 | name | text | |
 | description | text | |
 | template_id | uuid FK -> automation_templates.id nullable | Origin template |
+| flow_kind | enum(`wow_onboarding`,`kid_sandbox`,`production`) | Allows onboarding drafts to live beside real automations |
 | requires_guardian_approval | boolean | Determines if flow changes land in approvals |
 | status | enum(`draft`,`active`,`paused`,`archived`) | |
 | created_at | timestamptz | |
@@ -409,9 +442,9 @@ This schema maps directly to the MVP user stories in `.docs/user-stories.md`. Ea
 | --- | --- | --- |
 | id | uuid PK | |
 | flow_id | uuid FK -> automation_flows.id | |
-| node_type | enum(`income`,`rule`,`bucket`,`account`,`nudge`) | Matches Money Map UX |
+| node_type | enum(`income`,`rule`,`bucket`,`account`,`nudge`) | Matches Money Map UX; `account` nodes represent deposit, invest, liability, and destination endpoints |
 | label | text | Display name |
-| config | jsonb | Condition/action specifics |
+| config | jsonb | Trigger, condition, action, and timeline specifics (if/then/else, thresholds, schedules, active periods) |
 | position | jsonb | React Flow coordinates |
 | created_at | timestamptz | |
 
@@ -482,16 +515,18 @@ This schema maps directly to the MVP user stories in `.docs/user-stories.md`. Ea
 | --- | --- | --- |
 | id | uuid PK | |
 | household_id | uuid FK -> households.id | |
-| event_type | enum(`income.received`,`purchase.logged`,`goal.milestone`,`automation.updated`,`nudge.applied`,`invest.order_submitted`,`invest.order_filled`,`request.created`,`request.updated`,`reward.available`,`notification.sent`) | Unified event stream |
+| event_type | enum(`income.received`,`purchase.logged`,`goal.milestone`,`automation.updated`,`nudge.applied`,`invest.order_submitted`,`invest.order_filled`,`request.created`,`request.updated`,`wow.plan_submitted`,`wow.plan_returned`,`wow.plan_approved`,`reward.available`,`notification.sent`) | Unified event stream |
 | actor_id | uuid FK -> users.id nullable | |
 | payload | jsonb | |
 | occurred_at | timestamptz | |
 
 **Relationships**
 - Money Map editor persists to `automation_nodes`/`automation_edges`.
-- `automation_templates` seed flows and enable guardian-authored patterns.
+- `automation_templates` (with `scenario_type`) seed baseline flows and stress-test overlays for the wow playground.
+- `automation_flows` use `flow_kind` + `status` to distinguish onboarding drafts, sandbox experiments, and production automations under the same primitive.
+- Timeline period edits from the wow playground persist inside `automation_nodes.config`, keeping simulations and live automations aligned.
 - `automation_flow_shares` let guardians offer flows to kids, honoring the coaching user story.
-- `automation_executions` connect to earn events and generate transactions.
+- `automation_executions` connect to earn events, run preview simulations, and generate transactions when applied.
 - Nudge tables allow both kid enrollment and guardian override stories.
 
 ## 7. Requests & Approvals
@@ -502,7 +537,7 @@ This schema maps directly to the MVP user stories in `.docs/user-stories.md`. Ea
 | id | uuid PK | |
 | household_id | uuid FK -> households.id | |
 | kid_id | uuid FK -> users.id | Initiator |
-| request_type | enum(`automation_change`,`new_card`,`limit_change`,`goal_transfer`,`purchase`,`earn_proposal`,`unlock_goal`,`custom`) | Covers sidebar Requests scope |
+| request_type | enum(`automation_change`,`new_card`,`limit_change`,`goal_transfer`,`purchase`,`earn_proposal`,`unlock_goal`,`wow_plan`,`custom`) | Covers sidebar Requests scope |
 | payload | jsonb | Context for guardians |
 | status | enum(`pending`,`approved`,`denied`,`withdrawn`) | |
 | created_at | timestamptz | |
@@ -718,7 +753,7 @@ This schema maps directly to the MVP user stories in `.docs/user-stories.md`. Ea
 | --- | --- | --- |
 | id | uuid PK | |
 | household_id | uuid FK -> households.id | |
-| event_type | enum(`income.received`,`purchase.logged`,`goal.milestone`,`automation.updated`,`nudge.applied`,`invest.order_submitted`,`invest.order_filled`,`request.created`,`request.updated`,`reward.available`,`notification.sent`) | Unified event stream |
+| event_type | enum(`income.received`,`purchase.logged`,`goal.milestone`,`automation.updated`,`nudge.applied`,`invest.order_submitted`,`invest.order_filled`,`request.created`,`request.updated`,`wow.plan_submitted`,`wow.plan_returned`,`wow.plan_approved`,`reward.available`,`notification.sent`) | Unified event stream |
 | actor_id | uuid FK -> users.id nullable | |
 | payload | jsonb | Domain-specific context |
 | occurred_at | timestamptz | |
@@ -781,11 +816,13 @@ This schema maps directly to the MVP user stories in `.docs/user-stories.md`. Ea
 | redeemed_at | timestamptz nullable | |
 
 ## Relationship Summary
-- One `household` aggregates many `users`, `accounts`, `goals`, `automations`, `chores`, notifications, and Reward Vault entries.
+- One `household` aggregates many `users`, `accounts`, `account_partitions`, wealth snapshots, `automations`, `goals`, `chores`, notifications, and Reward Vault entries.
 - Guardians manage kids through `guardian_child_settings`, `requests`, `approval_actions`, per-kid guardrail tables (`card_controls`, `nudge_enrollments`, `automation_flow_shares`), and Reward Vault fulfillment (`reward_vault_actions`).
 - Kid autonomy flows (earn proposal → approval → earn event → allocation → automation → transactions) traverse `earn_proposals`, `requests`, `earn_events`, `automation_executions`, and `transactions`, ensuring data consistency for dashboards and ledgers.
+- Wealth ladder experiences read from `wealth_progress_snapshots` (fed by account snapshots or automation previews) so the wow flow and dashboards stay in sync.
 - Practice investing stories are backed by `securities`, `investment_orders`, `investment_positions`, and `investment_watchlist` with approval hooks.
 - Learning & growth tables (`lessons`, `xp_ledger`, `reward_catalog`, `reward_vault_entries`) provide status progression and clear paths to future tangible rewards.
 - Notifications leverage `household_events` for deterministic fan-out with CTA metadata and idempotent delivery.
+- `household_events` include wow playground lifecycle events so approvals, notifications, and analytics stay in sync.
 
 This design keeps the data structures and the MVP user stories in lockstep so future adjustments can modify both artifacts together.

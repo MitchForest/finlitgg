@@ -7,6 +7,7 @@
 - As a Kid, I want a dedicated `Requests` entry in the sidebar so that I can review the status of everything awaiting guardian action without hunting for it.
 - As a Guardian, I want a dedicated `Approvals` entry in the sidebar so that I can batch-review all pending chores, purchases, automations, and requests in one place.
 - As any signed-in user, I want the top bar to surface profile actions, streak/XP progress, search, and notifications so that I can quickly access global features without leaving my current page.
+- As any signed-in user, I want a sparkle/"Play" control in the top bar that relaunches the wow onboarding flow so that I can revisit my money map simulation on demand.
 
 ### Notifications & Activity
 - As any user, I want a unified notifications drawer that groups reminders, approvals, and nudges so that I can triage important actions from anywhere in the app.
@@ -26,6 +27,15 @@
 - As a Kid, I want actionable reminders (finish a lesson, fund a goal, pay off a credit balance) so that I know what to do next to stay on track.
 - As a Kid, I want a compound interest visualizer where I can tweak deposit amount and frequency so that I can see how small changes affect long-term goals.
 - As a Kid, I want to see pending requests or approvals I initiated so that I have transparency on what still needs guardian action.
+
+### Wow Playground (Money Map)
+- As a Kid, I want my first-run onboarding to land in an animated money map so that I immediately see how my world of money fits together.
+- As a Kid, I want to add or edit income sources, deposit accounts, investment accounts, liabilities, and destination nodes inside the playground so that my simulation reflects real life.
+- As a Kid, I want to define buckets/pods under spend and savings accounts (Needs, Wants, Vacation, etc.) so that I can direct money with intent.
+- As a Kid, I want to adjust allocations, timeline segments, and automation rules and watch the wealth ladder update instantly so that I understand cause and effect.
+- As a Kid, I want to apply pre-made “what if” scenario overlays (e.g., $200k student loan, 20% APR card, expensive rent) so that I can explore risky decisions in a safe space.
+- As a Kid, I want to save a playground run as a draft that I can reopen from the sparkle icon so that my work isn’t lost between sessions.
+- As a Kid, I want to request guardian approval to convert a draft plan into real accounts or automations so that I can act on my ideas with proper guardrails.
 
 ### Earn
 - As a Kid, I want to browse available chores and missions with rewards so that I can pick how I earn money or XP.
@@ -108,6 +118,8 @@
 
 ### Automations Oversight
 - As a Guardian, I want to review, approve, or lock automations created by my child so that I ensure money flows stay responsible.
+- As a Guardian, I want to see wow playground plan submissions with projected wealth ladder milestones so that I can assess the long-term impact before activating anything.
+- As a Guardian, I want to return a plan with inline comments or requested changes so that my child can iterate while staying autonomous.
 - As a Guardian, I want to clone or share automation templates with my child so that I can teach best practices hands-on.
 - As a Guardian, I want to audit the log of automation executions so that I know when adjustments are needed.
 
@@ -125,6 +137,7 @@
 
 ### Approvals Workspace
 - As a Guardian, I want an approvals workspace that aggregates pending chores, spending requests, automations, investment orders, goal transfers, and Reward Vault commitments so that I can clear the queue efficiently.
+- As a Guardian, I want wow plan drafts to surface alongside other approvals with a quick summary (net worth, time-to-next-level) so that I can prioritize which proposals to review first.
 - As a Guardian, I want bulk actions (approve, deny, send feedback) across related items so that I reduce repetitive work.
 
 ### Settings & Household Admin

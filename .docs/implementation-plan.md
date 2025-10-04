@@ -31,8 +31,8 @@ This implementation roadmap aligns with `.docs/user-stories.md`, `.docs/data-mod
    - Use TanStack Router (already scaffolded) to define routes: `dashboard`, `earn`, `save`, `invest`, `spend`, `donate`, `automations`, `learn`, `requests`, `approvals`, `settings`.
    - Create placeholder components under `apps/web/src/routes` matching each path.
 2. **Global providers**
-   - Wrap root route with `ThemeProvider`, `QueryProvider` (Convex React client), `AuthProvider` (Better Auth client when ready).
-   - Configure Sonner toast provider for notifications.
+   - Wrap root route with `ThemeProvider` and placeholder data providers (Convex client stub until schema lands).
+   - Add TODO hooks for Auth/notifications; full integration moves to backlog to avoid blocking UI progress.
 3. **Layout shell**
    - Build `AppShell` component (`components/layout/app-shell.tsx`) featuring:
      - Left sidebar using `Sidebar` shadcn component with design tokens.
@@ -43,10 +43,10 @@ This implementation roadmap aligns with `.docs/user-stories.md`, `.docs/data-mod
    - Add `usePersona()` hook that reads `global_role` from session to toggle kid/guardian variants (e.g., accent backgrounds, nav labels for `Requests` vs `Approvals`).
 5. **Placeholder content**
    - Insert skeleton cards from `Skeleton` component for each page until data wiring occurs.
-6. **Smoke tests**
-   - Add Playwright test ensuring navigation between all routes without console errors.
+6. **Manual smoke checklist**
+   - Document a lightweight manual QA pass (navigate key routes, resize, dark mode toggle) until automated tests move out of backlog.
 
-## Phase 2 — Shared UI Building Blocks
+## Phase 2 — Shared UI & Wow Entry Foundations
 1. **Domain cards**
    - Create reusable components:
      - `KpiCard` (balance, change, sparkline placeholder).
@@ -69,40 +69,60 @@ This implementation roadmap aligns with `.docs/user-stories.md`, `.docs/data-mod
    - Build `TanStackForm` wrapper integrating TanStack Form, shared Zod resolvers, and shadcn `FormField` components. Provide helpers for async validation and optimistic updates.
 9. **Storybook inventory**
    - Stand up Storybook in `apps/web` listing these building blocks, TanStack Form examples, and TanStack Table patterns for design review.
+10. **Wow playground entry point**
+    - Add sparkle/"Play" control to the top bar that routes to `/wow` (or opens modal) with first-run guard so onboarding flows directly into the playground.
+    - Scaffold `WowPlaygroundLayout` with hero intake card, React Flow canvas shell, timeline editor stub, and CTA rail; keep state local until Convex wiring arrives.
+    - Build draft selector drawer component ready to list saved runs once `automation_flows` backing is wired.
+11. **Bucket & ladder widgets**
+    - Compose `BucketCard`/`BucketSlider` atoms that map account partitions to UI (Needs, Wants, Goals) and emit allocation change events.
+    - Create wealth ladder rail component consuming snapshot props so dashboards and playground share the same visualization.
+12. **Draft lifecycle UX**
+    - Implement skeleton flows for `Save Draft`, `Rename Draft`, `Delete Draft` using local state; surface toast feedback via design-system notifications.
+    - Add guardian approval CTA stub on draft summary modal (disabled + tooltip until backend wiring).
+13. **Scenario overlay scaffolding**
+    - Define UX for applying baseline vs stress scenario (toggle chips + legend) with mocked data; ensure layout accommodates future comparisons.
+14. **Timeline editor shell**
+    - Build period blocks with drag/resize handles (local state only) and guard against overlap; connect changes to allocation/bucket widgets for immediate visual response.
 
 ## Phase 3 — Data Integration Foundations
 1. **Convex client setup**
    - Generate Convex client (`pnpm convex dev`) and create `apps/web/src/lib/convex-client.ts` with auth token pass-through.
-2. **Domain hooks**
-   - For each data domain create typed hooks in `apps/web/src/hooks` using `convex/react` and TanStack Query adapters:
-     - `useHousehold()`, `useAccounts()`, `useTransactions(accountId)`, `useEarnEvents()`, `useGoals()`, `useAutomationFlows()`, `useNotifications()`, `useRewardVault()`.
+2. **Schema updates for wow primitives**
+   - Migrate `accounts` to include `account_subtype`, add new `account_partitions`, `wealth_progress_snapshots`, and wire `virtual_cards.partition_id`.
+   - Extend `automation_templates` with `scenario_type`, `automation_flows` with `flow_kind`, and `requests.request_type` with `wow_plan`.
+   - Backfill seed data + indexes for the new tables/columns.
+3. **Domain hooks & selectors**
+   - Create typed hooks in `apps/web/src/hooks` using `convex/react` (`useAccounts`, `useAccountPartitions`, `useWealthSnapshots`, `useAutomationDrafts`, etc.).
+   - Expose selector helpers for derived data (e.g., mapping partitions into bucket widgets, wealth ladder summaries) without layering TanStack Query on top.
    - Define Zod validators referencing `packages/shared` schemas; infer types to enforce end-to-end type safety.
-3. **Sample data**
-   - Add backend seed script aligning with data models: households, users, accounts, transactions, goals, chores, automations, reward catalog, notifications.
-4. **Provider registry wiring**
+4. **Sample data & scenario seeding**
+   - Extend backend seed script with baseline accounts, partitions, wealth ladder snapshots, and pre-made wow scenario templates (baseline + stress tests).
+   - Seed sparkle entry metadata (first-run flag) so onboarding can hand-off cleanly.
+5. **Provider registry wiring**
    - Implement `backend/convex/providers.ts` helper that resolves adapters based on `provider_configs`, update domain mutations/actions to use the injected registry, and add contract tests for the simulated providers.
-5. **Access guard**
+6. **Access guard**
    - Implement `ProtectedRoute` that checks persona gating (kids only see own data; guardians see aggregated dashboards).
-6. **Observability**
-   - Integrate simple analytics events (console stub for now) to ensure important actions (approve request, create automation, fulfill reward) log to `household_events`.
+7. **Draft persistence & approvals**
+   - Add Convex mutations/actions for saving wow playground drafts (`automation_flows` with `flow_kind = 'wow_onboarding'`), recording preview results (`wealth_progress_snapshots`), and submitting drafts to guardians (`requests.create` with `wow_plan`).
+   - Ensure guardian approval actions patch flow status + emit household events for notifications/toasts.
 
-## Phase 4 — Money Flow Simulator & Dashboard
+## Phase 4 — Wow Playground & Dashboard
 1. **Simulation engine**
-   - Build `packages/shared/simulations` module with deterministic projections (earnings estimates, allocation percentages, growth rates per bucket, configurable horizon). Provide Convex action `simulations.previewFlow` that applies household rules and returns timeline data.
-   - Support scenarios: baseline, adjusted allocations, best/worst-case growth. Validate inputs with Zod.
+   - Build `packages/shared/simulations` module with deterministic projections that consume `automation_flows` drafts, account partitions, and growth assumptions. Expose Convex action `simulations.previewFlow` returning timeline + wealth snapshot data.
+   - Support scenario tags from `automation_templates` (baseline, stress, custom) and guard math with Zod validators.
 2. **Flow animation experience**
-   - Create `MoneyFlowSimulator` feature (React) using animation utilities + Canvas/React Flow overlays to animate earnings splitting into Save/Spend/Invest/Donate buckets.
-   - Implement interactive controls: time horizon slider, growth rate knobs, allocation handles, scenario compare toggle. Use Framer Motion for flowing chips/pills and sparkline transitions.
+   - Create `WowPlayground` feature (React) using animation utilities + React Flow overlays to animate income, partitions, and liabilities; reuse bucket widgets and ladder rail from Phase 2.
+   - Implement interactive controls: time horizon slider, timeline period editor, allocation sliders, scenario toggle chips. Persist edits to local state, then sync to Convex draft mutations on save.
 3. **Wealth ladder projection**
-   - Combine simulation output into net-worth timeline, progress toward next wealth ladder rung, and highlight milestone dates. Integrate donut/line charts with animated transitions.
-4. **Dashboard integration**
-   - Compose KPIs (Balance, Earned, Invested, Spent, Donated) using `KpiCard` plus embed Money Flow Simulator as hero module. Retain reminders, notifications, and persona-specific cards.
-   - Guardian view includes household summary + ability to approve proposed allocation templates from simulator; Kid view surfaces “Apply this plan” CTA that writes to automations.
+   - Combine simulation output into wealth ladder snapshots (write to `wealth_progress_snapshots`) and highlight milestone unlocks with celebration animations + copy.
+   - Surface comparison view (baseline vs selected scenario) and note months-to-next-level deltas.
+4. **Dashboard integration & approvals**
+   - Embed latest wealth snapshot + wow CTA on kid dashboard; show draft list + sparkle re-entry.
+   - Guardian dashboard surfaces pending wow plan approvals with condensed summary and quick actions; approval updates flow status and triggers notifications.
 5. **Notifications feed**
-   - Use `ScrollArea` to show top 5 notifications with `Badge` for severity, triggered by simulation approvals as well.
-6. **Testing**
-   - Unit tests for simulation math (baseline vs adjusted scenarios) and action validation.
-   - Playwright scenario walking through the simulator: adjust allocations, preview results, apply plan.
+   - Use `ScrollArea` to show top 5 notifications with `Badge` for severity; include wow plan submitted/approved events and scenario reminder nudges.
+6. **Demo QA checklist**
+   - Maintain a manual script covering wow intake, draft save, replay, scenario toggle, guardian approval preview; automate later (backlog).
 
 ## Phase 5 — Earn & Requests
 1. **Earn page**
@@ -118,6 +138,14 @@ This implementation roadmap aligns with `.docs/user-stories.md`, `.docs/data-mod
    - Implement `ReviewAllocationModal` leveraging TanStack Form: kid sees suggested splits, can edit percentages per account/goal, and submit. Submission calls `earn.confirmAllocation` storing final splits and transitions event to `applied` or `awaiting_guardian` (if guardrails require).
 5. **Reward triggers**
    - When streak or mission milestones are hit, create Reward Vault entries (`rewardVault.createFromMilestone`) in Convex and show toast confirmation.
+   
+## Backlog — Post-Demo Enhancements
+- **Auth integration**: Wire Better Auth client/server, gated routes, and session refresh handling.
+- **Automated testing**: Add Vitest unit coverage for simulations + Convex actions and Playwright end-to-end suites.
+- **Observability & analytics**: Emit structured telemetry events, dashboards, and error monitoring once wow flow stabilizes.
+- **Production notifications**: Replace placeholder toasts with Convex-backed notification + Sonner integration.
+- **Performance hardening**: Lazy-load heavy flows, add Suspense boundaries, and tune particle counts for low-end devices.
+- **Content/system guardrails**: Flesh out copywriting review, legal/privacy checks, and Guardian audit exports prior to launch.
 6. **Convex functions**
    - Implement queries/mutations: `earn.listChores`, `earn.submitProposal`, `earn.reviewSubmission`, `earn.confirmAllocation`, `earn.listAllowances`, `rewardVault.createFromMilestone`.
 7. **Validation**
@@ -213,9 +241,6 @@ This implementation roadmap aligns with `.docs/user-stories.md`, `.docs/data-mod
    - Long-running automation success (e.g., 4 weeks without missed allocation) can grant Reward Vault entry. Implement backend check that creates event + vault item.
 7. **Convex functions**
    - `automation.listFlows`, `automation.saveFlow`, `automation.simulate`, `automation.activate`, `automation.share`, `automation.listExecutions`, `rewardVault.createFromAutomation`.
-8. **Testing**
-   - Unit tests for rule DSL evaluation.
-   - Playwright scenario: build flow from template, run preview, save, share with guardian.
 
 ## Phase 11 — Learn, XP & Reward Vault Experience
 1. **Lesson index**
@@ -231,9 +256,6 @@ This implementation roadmap aligns with `.docs/user-stories.md`, `.docs/data-mod
    - Apply design-system friendly toggles (e.g., theme switcher) when a cosmetic vault item is available.
 6. **Convex functions**
    - `learn.listLessons`, `learn.getLesson`, `learn.submitQuiz`, `learn.listProgress`, `rewardVault.listEntries`, `rewardVault.updateStatus`.
-7. **Testing**
-   - Ensure quiz attempts enforce gating and create vault entries when configured.
-   - Unit tests for reward status transitions (available → awaiting guardian → fulfilled).
 
 ## Phase 12 — Requests & Approvals Workspaces
 1. **Kid Requests page**
@@ -248,8 +270,6 @@ This implementation roadmap aligns with `.docs/user-stories.md`, `.docs/data-mod
    - Link “View Details” actions to open relevant modals/drawers, mark notifications as read.
 4. **Convex functions**
    - `requests.listByKid`, `requests.listPending`, `requests.updateStatus`, `requests.addComment`, `rewardVault.listGuardianQueue`.
-5. **Testing**
-   - Playwright flows verifying approvals update notifications, vault entries, and ledger events.
 
 ## Phase 13 — Settings & Household Admin
 1. **Profile settings**
@@ -264,8 +284,6 @@ This implementation roadmap aligns with `.docs/user-stories.md`, `.docs/data-mod
    - Table or timeline displaying `activity_log` entries, including Reward Vault actions.
 6. **Convex functions**
    - `settings.updateProfile`, `settings.listMembers`, `settings.inviteGuardian`, `settings.setDevicePin`, `settings.listAuditLog`, `rewardCatalog.list`, `rewardCatalog.upsert`.
-7. **Testing**
-   - Unit tests for permission gating (kid cannot access admin tab).
 
 ## Phase 14 — Notifications & Event Pipeline
 1. **Event emitters**
@@ -276,8 +294,6 @@ This implementation roadmap aligns with `.docs/user-stories.md`, `.docs/data-mod
    - Add `useNotifications()` hook to stream unread notifications, show toasts via Sonner.
 4. **Notification drawer**
    - Right-side sheet listing notifications, filtering by type (`Tabs`). Provide action chips per `action_type`.
-5. **Testing**
-   - Integration test: submit request -> guardian sees toast; approve -> kid receives toast; vault entry unlock -> kid gets celebration toast.
 
 ## Phase 15 — Polishing & QA
 1. **Responsive sweep**
@@ -291,9 +307,6 @@ This implementation roadmap aligns with `.docs/user-stories.md`, `.docs/data-mod
    - Align copy with voice guidelines. Provide microcopy for tooltips, error states, Reward Vault explanations.
 5. **Demo data seeding**
    - Finalize seeded accounts, transactions, lessons, missions, and sample Reward Vault entries for MVP demo.
-6. **Regression tests**
-   - Expand Playwright suite: baseline flows for both personas (kid sign-in, guardian approvals, automation simulation, reward fulfillment).
-
 ---
 
 Following these phases ensures a cohesive, design-system-driven web app that satisfies the MVP user stories, leverages the shared data model, and maintains consistency via reusable shadcn-based components while keeping the gamification model simple and transparent.
